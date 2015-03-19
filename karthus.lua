@@ -95,7 +95,9 @@ function OnLoad()
 
 		ts:update()
 		if ts.target ~= nil then
-			SxOrb:ForceTarget(ts.target) 
+			if SXO then
+				SxOrb:ForceTarget(ts.target) 
+			end
 			target = DPTarget(ts.target)
 			else if ts.target == nil then target = nil end
 		end
@@ -125,79 +127,79 @@ function OnLoad()
 		end
 	end
 
-		function combo(target)
-			if target and target ~= nil then
+	function combo(target)
+		if target and target ~= nil then
 
-				if cfg.combo.useW and myHero:GetSpellData(_W).currentCd <= 0 then
-					local state,hitPos,perc = dp:predict(target,karthusW)
-					if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_W,hitPos.x,hitPos.z) end
-				end
-				if cfg.combo.useQ and myHero:GetSpellData(_Q).currentCd <= 0 then
-					local state,hitPos,perc = dp:predict(target,karthusQ)
-					if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_Q,hitPos.x,hitPos.z)   end
-				end
-
+			if cfg.combo.useW and myHero:GetSpellData(_W).currentCd <= 0 then
+				local state,hitPos,perc = dp:predict(target,karthusW)
+				if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_W,hitPos.x,hitPos.z) end
 			end
-			comboE()
-		end
-
-		function harass(target)
-			if target and target ~= nil and harassManaManager() then
+			if cfg.combo.useQ and myHero:GetSpellData(_Q).currentCd <= 0 then
 				local state,hitPos,perc = dp:predict(target,karthusQ)
-				if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_Q,hitPos.x,hitPos.z) end
+				if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_Q,hitPos.x,hitPos.z)   end
+			end
+
+		end
+		comboE()
+	end
+
+	function harass(target)
+		if target and target ~= nil and harassManaManager() then
+			local state,hitPos,perc = dp:predict(target,karthusQ)
+			if state == SkillShot.STATUS.SUCCESS_HIT then CastSpell(_Q,hitPos.x,hitPos.z) end
+		end
+	end
+
+	function OnDraw()
+		if cfg.draw.qDraw then
+			DrawCircle(myHero.x,myHero.y,myHero.z,875,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
+		end
+		if cfg.draw.wDraw then
+			DrawCircle(myHero.x,myHero.y,myHero.z,1000,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
+		end
+		if cfg.draw.eDraw then
+			DrawCircle(myHero.x,myHero.y,myHero.z,550,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
+		end
+	end
+
+	function eManaManager()
+		if myHero.mana < (myHero.maxMana * ( cfg.combo.eMana / 100)) then
+			return false
+		else
+			return true
+		end
+	end
+
+	function harassManaManager()
+		if myHero.mana < (myHero.maxMana * ( cfg.harass.mana / 100)) then
+			return false
+		else
+			return true
+		end
+	end
+
+	function comboE()
+		if myHero:GetSpellData(_E).toggleState == 2 and eManaManager() == false then
+			CastSpell(_E)
+		end
+		if cfg.combo.useE and myHero:GetSpellData(_E).currentCd <= 0 and myHero:GetSpellData(_E).toggleState == 1 and eManaManager() then
+			for i, val in pairs(enemyChamps) do
+				local dist = GetDistance(myHero,val.unit)
+				if dist <= 550 then CastSpell(_E)
+					break
+				end 
 			end
 		end
 
-		function OnDraw()
-			if cfg.draw.qDraw then
-				DrawCircle(myHero.x,myHero.y,myHero.z,875,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
+		if cfg.combo.useE and myHero:GetSpellData(_E).currentCd <= 0 and myHero:GetSpellData(_E).toggleState == 2 then
+			check = 0
+			for i, val in pairs(enemyChamps) do
+				local dist = GetDistance(myHero,val.unit)
+				if dist <= 550 then break end
+				check = check + 1
 			end
-			if cfg.draw.wDraw then
-				DrawCircle(myHero.x,myHero.y,myHero.z,1000,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
-			end
-			if cfg.draw.eDraw then
-				DrawCircle(myHero.x,myHero.y,myHero.z,550,RGB(cfg.draw.qColor[2], cfg.draw.qColor[3], cfg.draw.qColor[4]))
-			end
-		end
-
-		function eManaManager()
-			if myHero.mana < (myHero.maxMana * ( cfg.combo.eMana / 100)) then
-				return false
-			else
-				return true
-			end
-		end
-
-		function harassManaManager()
-			if myHero.mana < (myHero.maxMana * ( cfg.harass.mana / 100)) then
-				return false
-			else
-				return true
-			end
-		end
-
-		function comboE()
-			if myHero:GetSpellData(_E).toggleState == 2 and eManaManager() == false then
+			if check >= enemyChampsCount then
 				CastSpell(_E)
 			end
-			if cfg.combo.useE and myHero:GetSpellData(_E).currentCd <= 0 and myHero:GetSpellData(_E).toggleState == 1 and eManaManager() then
-				for i, val in pairs(enemyChamps) do
-					local dist = GetDistance(myHero,val.unit)
-					if dist <= 550 then CastSpell(_E)
-						break
-					end 
-				end
-			end
-
-			if cfg.combo.useE and myHero:GetSpellData(_E).currentCd <= 0 and myHero:GetSpellData(_E).toggleState == 2 then
-				check = 0
-				for i, val in pairs(enemyChamps) do
-					local dist = GetDistance(myHero,val.unit)
-					if dist <= 550 then break end
-					check = check + 1
-				end
-				if check >= enemyChampsCount then
-					CastSpell(_E)
-				end
-			end
 		end
+	end
