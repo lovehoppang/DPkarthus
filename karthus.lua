@@ -1,7 +1,7 @@
 --[[
 
 	Script Name: DP Karthus
-    Author: lovehoppang
+    	Author: lovehoppang
 	Version: 0.1
 	19.03.2015
 ]]--
@@ -42,7 +42,7 @@ function OnLoad()
 			SxOrb:LoadToMenu(cfg.orbWalking)
 		end
 		cfg:addParam("arg","",5,"")
-		cfg:addParam("Author","Author: ",5,"")
+		cfg:addParam("Author","Author: lovehoppang",5,"")
 		cfg:addParam("Version","Version: "..version,5,"")
 		initialize()
 
