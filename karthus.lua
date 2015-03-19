@@ -1,7 +1,7 @@
 --[[
 
 	Script Name: DP Karthus
-    Author: lovehobbang
+    Author: lovehoppang
 	Version: 0.1
 	19.03.2015
 ]]--
