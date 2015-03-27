@@ -36,10 +36,17 @@ if AutoUpdate then
 
      SourceUpdater(_ScriptName, _ScriptVersion, UPDATE_HOST, UPDATE_PATH..".lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, UPDATE_PATH..".version"):CheckUpdate()
 end
-
+function AfterDownload()
+	print("<b><font color=\"#6699FF\">Required libraries downloaded successfully, please reload (double F9).</font>")
+end
 if FileExist(LIB_PATH.."DivinePred.lua") then
 require "DivinePred"
 else print("not found DivinePrediction.") return
+end
+
+if FileExist(LIB_PATH.."SxOrbWalk.lua") then
+require "SxOrbWalk"
+else DownloadFile("https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua", LIB_PATH .. "SxOrbWalk.lua", AfterDownload()) return
 end
 
 local TsQ = TargetSelector(8, 740, DAMAGE_MAGIC, 1, true)
@@ -76,7 +83,7 @@ function OnLoad()
 	cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
 	cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
 	cfg.Combo:addParam("useR", "Smart ult on", SCRIPT_PARAM_ONOFF, true)
-	cfg.Combo:addParam("orbkey", "orbwalk Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+	cfg.Combo:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
 	cfg.Harass:addParam("Harass", "Harass Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
 	cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONOFF, false)
 	cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 50, 0, 100, -1)
@@ -109,7 +116,7 @@ function OnTick()
 		Combo()
 		lastTimeStamp = os.clock() * 100
 	end
-	if cfg.Harass.Harass and dpCD < os.clock() * 100 - lastTimeStamp then
+	if (cfg.Harass.Harass or cfg.Harass.toggleHarass) and dpCD < os.clock() * 100 - lastTimeStamp then
 		Harass()
 		lastTimeStamp = os.clock() * 100
 	end
@@ -132,9 +139,12 @@ function Combo()
 
 	if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
 		CastQ(TsQ.target)
+		if tsa.target ~= nil then
+		myHero:Attack(tsa.target)
+		end
 	end
 
-	if TsW.target ~= nil and myHero:CanUseSpell(_W) == READY then
+	if cfg.Combo.useW and TsW.target ~= nil and myHero:CanUseSpell(_W) == READY then
 		CastW(TsW.target)
 	end
 
