@@ -1,8 +1,8 @@
 if myHero.charName ~= "Viktor" then return end
 
-local ScriptName = "victorious_Viktor"
-local ScriptVersion = 0.1
-local ScriptAuthor = "lovehoppang"
+local _ScriptName = "victorious_Viktor"
+local _ScriptVersion = "1.0"
+local _ScriptAuthor = "lovehoppang"
 
 local AutoUpdate = true
 local SrcLibURL = "https://raw.github.com/TheRealSource/public/master/common/SourceLib.lua"
@@ -10,7 +10,7 @@ local SrcLibPath = LIB_PATH .. "SourceLib.lua"
 local SrcLibDownload = false
 
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = ""
+local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor"
 
 
 if FileExist(SrcLibPath) then
@@ -34,8 +34,7 @@ end
 
 if AutoUpdate then
 
-    SourceUpdater("victorious_Viktor", tostring(_ScriptVersion), UPDATE_HOST, UPDATE_PATH, SCRIPT_PATH .. GetCurrentEnv().FILE_NAME):CheckUpdate()
-
+     SourceUpdater(_ScriptName, _ScriptVersion, UPDATE_HOST, UPDATE_PATH..".lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, UPDATE_PATH..".version"):CheckUpdate()
 end
 
 if FileExist(LIB_PATH.."DivinePred.lua") then
@@ -70,18 +69,18 @@ function OnLoad()
 	cfg = scriptConfig("Viktor","Viktor")
 	cfg:addSubMenu("Combo","Combo")
 	cfg:addSubMenu("Harass","Harass")
-	cfg:addSubMenu("KillSteal","KillSteal")
+	-- cfg:addSubMenu("KillSteal","KillSteal")
 	cfg:addSubMenu("ULT Setting","RSetting")
 	cfg:addSubMenu("Draw","Draw")
 	cfg.Combo:addParam("Combo", "Combo Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 	cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
 	cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
 	cfg.Combo:addParam("useR", "Smart ult on", SCRIPT_PARAM_ONOFF, true)
-	cfg.Combo:addParam("orbkey", "orbWalking Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+	cfg.Combo:addParam("orbkey", "orbwalk Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 	cfg.Harass:addParam("Harass", "Harass Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
 	cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONOFF, false)
 	cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 50, 0, 100, -1)
-	cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 2, 0, 5, -1)
+	cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 	cfg.Draw:addParam("enabled", "Draw enabled", SCRIPT_PARAM_ONOFF, true)
 	cfg.Draw:addParam("lfc", "Use Lag Free Circles", SCRIPT_PARAM_ONOFF, true)
 	cfg.Draw:addParam("drawAA", "Draw AA Range", SCRIPT_PARAM_ONOFF, true)
