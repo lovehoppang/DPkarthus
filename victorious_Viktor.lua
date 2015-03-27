@@ -1,52 +1,33 @@
 if myHero.charName ~= "Viktor" then return end
 
-local _ScriptName = "victorious_Viktor"
-local _ScriptVersion = "1.0"
-local _ScriptAuthor = "lovehoppang"
-
-local AutoUpdate = true
-local SrcLibURL = "https://raw.github.com/TheRealSource/public/master/common/SourceLib.lua"
-local SrcLibPath = LIB_PATH .. "SourceLib.lua"
-local SrcLibDownload = false
-
-local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor"
-
-
-if FileExist(SrcLibPath) then
-
-    require "SourceLib"
-    SrcLibDownload = false
-
-else
-
-    SrcLibDownload = true
-    DownloadFile(SrcLibURL, SrcLibPath, function() print("Downloaded SourceLib, please reload. (Double F9)") end)
-
-end
-
-if SrcLibDownload == true then
-
-    print("SourceLib was not found. Downloading...")
-    return
-
-end
-
-if AutoUpdate then
-
-     SourceUpdater(_ScriptName, _ScriptVersion, UPDATE_HOST, UPDATE_PATH..".lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, UPDATE_PATH..".version"):CheckUpdate()
-end
-function AfterDownload()
-	print("<b><font color=\"#6699FF\">Required libraries downloaded successfully, please reload (double F9).</font>")
-end
-if FileExist(LIB_PATH.."DivinePred.lua") then
-require "DivinePred"
-else print("not found DivinePrediction.") return
-end
-
-if FileExist(LIB_PATH.."SxOrbWalk.lua") then
 require "SxOrbWalk"
-else DownloadFile("https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua", LIB_PATH .. "SxOrbWalk.lua", AfterDownload()) return
+require "DivinePred"
+
+_G.AUTOUPDATE = true
+
+
+local version = "1.0"
+local UPDATE_HOST = "raw.github.com"
+local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
+local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>victorious_Viktor:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+if _G.AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/lovehoppang/DPkarthus/master/victorious_Viktor.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				AutoupdaterMsg("New version available "..ServerVersion)
+				AutoupdaterMsg("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+			else
+				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+			end
+		end
+	else
+		AutoupdaterMsg("Error downloading version info")
+	end
 end
 
 local TsQ = TargetSelector(8, 740, DAMAGE_MAGIC, 1, true)
@@ -73,12 +54,15 @@ local damage = nil
 local cfg = nil
 
 function OnLoad()
-	cfg = scriptConfig("Viktor","Viktor")
-	cfg:addSubMenu("Combo","Combo")
-	cfg:addSubMenu("Harass","Harass")
+	SxO = SxOrbWalk()
+	
+	cfg = scriptConfig("victorious_Viktor","Viktor")
+	cfg:addSubMenu("Combo Setting","Combo")
+	cfg:addSubMenu("Harass Setting","Harass")
 	-- cfg:addSubMenu("KillSteal","KillSteal")
 	cfg:addSubMenu("ULT Setting","RSetting")
-	cfg:addSubMenu("Draw","Draw")
+	cfg:addSubMenu("Draw Setting","Draw")
+	cfg:addSubMenu("SxOrbwalk Setting","sxo")
 	cfg.Combo:addParam("Combo", "Combo Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 	cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
 	cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
@@ -95,6 +79,7 @@ function OnLoad()
 	cfg.Draw:addParam("drawW", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
 	cfg.Draw:addParam("drawE", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
 	cfg.Draw:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
+	SxO:LoadToMenu(cfg.sxo)
 	myTrueRange = myHero.range + GetDistance(myHero.minBBox)
 	tsa.range = myTrueRange
 end
@@ -103,7 +88,7 @@ function OnTick()
 	if cfg == nil then return
 	end
 
-	if cfg.Combo.orbkey then
+	if cfg.Combo.orbkey and cfg.Combo.Combo then
 		_OrbWalk()
 	end
 
