@@ -1,6 +1,6 @@
 if myHero.charName ~= "Viktor" then return end
 
-require "SxOrbWalk"
+--require "SxOrbWalk"
 require "DivinePred"
 
 _G.AUTOUPDATE = true
@@ -54,34 +54,34 @@ local damage = nil
 local cfg = nil
 
 function OnLoad()
-	SxO = SxOrbWalk()
-	
-	cfg = scriptConfig("victorious_Viktor","Viktor")
-	cfg:addSubMenu("Combo Setting","Combo")
-	cfg:addSubMenu("Harass Setting","Harass")
+--	SxO = SxOrbWalk()
+
+cfg = scriptConfig("victorious_Viktor","Viktor")
+cfg:addSubMenu("Combo Setting","Combo")
+cfg:addSubMenu("Harass Setting","Harass")
 	-- cfg:addSubMenu("KillSteal","KillSteal")
 	cfg:addSubMenu("ULT Setting","RSetting")
 	cfg:addSubMenu("Draw Setting","Draw")
-	cfg:addSubMenu("SxOrbwalk Setting","sxo")
-	cfg.Combo:addParam("Combo", "Combo Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-	cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
-	cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
-	cfg.Combo:addParam("useR", "Smart ult on", SCRIPT_PARAM_ONOFF, true)
-	cfg.Combo:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
-	cfg.Harass:addParam("Harass", "Harass Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
-	cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONOFF, false)
-	cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 50, 0, 100, -1)
-	cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
-	cfg.Draw:addParam("enabled", "Draw enabled", SCRIPT_PARAM_ONOFF, true)
-	cfg.Draw:addParam("lfc", "Use Lag Free Circles", SCRIPT_PARAM_ONOFF, true)
-	cfg.Draw:addParam("drawAA", "Draw AA Range", SCRIPT_PARAM_ONOFF, true)
-	cfg.Draw:addParam("drawQ", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
-	cfg.Draw:addParam("drawW", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
-	cfg.Draw:addParam("drawE", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
-	cfg.Draw:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
-	SxO:LoadToMenu(cfg.sxo)
-	myTrueRange = myHero.range + GetDistance(myHero.minBBox)
-	tsa.range = myTrueRange
+--	cfg:addSubMenu("SxOrbwalk Setting","sxo")
+cfg.Combo:addParam("Combo", "Combo Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
+cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
+cfg.Combo:addParam("useR", "Smart ult on", SCRIPT_PARAM_ONOFF, true)
+cfg.Combo:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
+cfg.Harass:addParam("Harass", "Harass Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
+cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONOFF, false)
+cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 50, 0, 100, -1)
+cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
+cfg.Draw:addParam("enabled", "Draw enabled", SCRIPT_PARAM_ONOFF, true)
+cfg.Draw:addParam("lfc", "Use Lag Free Circles", SCRIPT_PARAM_ONOFF, true)
+cfg.Draw:addParam("drawAA", "Draw AA Range", SCRIPT_PARAM_ONOFF, true)
+cfg.Draw:addParam("drawQ", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
+cfg.Draw:addParam("drawW", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
+cfg.Draw:addParam("drawE", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
+cfg.Draw:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
+--	SxO:LoadToMenu(cfg.sxo)
+myTrueRange = myHero.range + GetDistance(myHero.minBBox)
+tsa.range = myTrueRange
 end
 
 function OnTick()
@@ -125,7 +125,7 @@ function Combo()
 	if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
 		CastQ(TsQ.target)
 		if tsa.target ~= nil then
-		myHero:Attack(tsa.target)
+			myHero:Attack(tsa.target)
 		end
 	end
 
@@ -193,9 +193,9 @@ function CastE(target)
 		end
 	end
 
-function OnDraw()
-__draw()
-end
+	function OnDraw()
+		__draw()
+	end
 
 
 	function OnProcessSpell(object, spell)
@@ -235,40 +235,40 @@ end
 
 
 
-function __draw()
+		function __draw()
 
-    DrawCircles()
+			DrawCircles()
 
-end
+		end
 
-function DrawCircles()
+		function DrawCircles()
 
-    if cfg and cfg.Draw and cfg.Draw.enabled then
+			if cfg and cfg.Draw and cfg.Draw.enabled then
 
-        if cfg.Draw.lfc then
+				if cfg.Draw.lfc then
 
-            if cfg.Draw.drawAA then DrawCircleLFC(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
+					if cfg.Draw.drawAA then DrawCircleLFC(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawQ then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
+					if cfg.Draw.drawQ then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawW then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+					if cfg.Draw.drawW then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawE then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
+					if cfg.Draw.drawE then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawR then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+					if cfg.Draw.drawR then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
 
         else -- NORMAL CIRCLES
 
-            if cfg.Draw.drawAA then DrawCircle(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
+        	if cfg.Draw.drawAA then DrawCircle(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawQ then DrawCircle(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
+        	if cfg.Draw.drawQ then DrawCircle(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawW then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+        	if cfg.Draw.drawW then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawE then DrawCircle(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
+        	if cfg.Draw.drawE then DrawCircle(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
 
-            if cfg.Draw.drawR then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+        	if cfg.Draw.drawR then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
         end
 
@@ -278,24 +278,24 @@ end
 
 
 function DrawCircleLFC(x, y, z, radius, color)
-    local vPos1 = Vector(x, y, z)
-    local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
-    local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
-    local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
-    if OnScreen({ x = sPos.x, y = sPos.y }, { x = sPos.x, y = sPos.y }) then
-        DrawCircleNextLvl(x, y, z, radius, 1, color, 75) 
-    end
+	local vPos1 = Vector(x, y, z)
+	local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
+	local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
+	local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
+	if OnScreen({ x = sPos.x, y = sPos.y }, { x = sPos.x, y = sPos.y }) then
+		DrawCircleNextLvl(x, y, z, radius, 1, color, 75) 
+	end
 end
 
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
-   radius = radius or 300
-  quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
-  quality = 2 * math.pi / quality
-  radius = radius*.92
-    local points = {}
-    for theta = 0, 2 * math.pi + quality, quality do
-        local c = WorldToScreen(D3DXVECTOR3(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
-        points[#points + 1] = D3DXVECTOR2(c.x, c.y)
-    end
-    DrawLines2(points, width or 1, color or 4294967295)
+	radius = radius or 300
+	quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
+	quality = 2 * math.pi / quality
+	radius = radius*.92
+	local points = {}
+	for theta = 0, 2 * math.pi + quality, quality do
+		local c = WorldToScreen(D3DXVECTOR3(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
+		points[#points + 1] = D3DXVECTOR2(c.x, c.y)
+	end
+	DrawLines2(points, width or 1, color or 4294967295)
 end
