@@ -8,7 +8,7 @@ require "DivinePred"
 _G.AUTOUPDATE = true
 
 
-local version = "1.1"
+local version = "1.11"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -96,7 +96,9 @@ function OnTick()
 	if cfg == nil then return
 	end
 
-	if myTrueRange < myHero.range + GetDistance(myHero.minBBox) then myTrueRange = myHero.range + GetDistance(myHero.minBBox)
+	if myTrueRange < myHero.range + GetDistance(myHero.minBBox) then
+	myTrueRange = myHero.range + GetDistance(myHero.minBBox)
+	tsa.range = myTrueRange
 	end
 
 	if cfg.Combo.orbkey and cfg.Combo.Combo then
