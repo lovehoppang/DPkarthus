@@ -144,9 +144,6 @@ function Combo()
 
 		if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
 			CastQ(TsQ.target)
-			if tsa.target ~= nil then
-				myHero:Attack(tsa.target)
-			end
 		end
 
 		if cfg.Combo.useW and TsW.target ~= nil and myHero:CanUseSpell(_W) == READY and wManaManager() then
