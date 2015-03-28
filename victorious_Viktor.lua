@@ -96,7 +96,7 @@ function OnTick()
 	if cfg == nil then return
 	end
 
-	if myTrueRange < 300 then myTrueRange = myHero.range + GetDistance(myHero.minBBox)
+	if myTrueRange < myHero.range + GetDistance(myHero.minBBox) then myTrueRange = myHero.range + GetDistance(myHero.minBBox)
 	end
 
 	if cfg.Combo.orbkey and cfg.Combo.Combo then
