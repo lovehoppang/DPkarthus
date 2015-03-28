@@ -15,7 +15,7 @@ local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>victorious_Viktor:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if _G.AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/lovehoppang/DPkarthus/master/victorious_Viktor.version")
+	local ServerData = GetWebResult(UPDATE_HOST, "/lovehoppang/DPkarthus/master/victorious_Viktor.version".."?rand="..math.random(1,10000))
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
