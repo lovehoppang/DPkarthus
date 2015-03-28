@@ -8,7 +8,7 @@ require "DivinePred"
 _G.AUTOUPDATE = true
 
 
-local version = "1.11"
+local version = "1.12"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -48,7 +48,7 @@ local KillStealStamp = os.clock()*100
 local lastAttack, lastWindUpTime, lastAttackCD = 0, 0, 0
 local myTrueRange = myHero.range + GetDistance(myHero.minBBox)
 local myTarget = nil
-local tsa = TargetSelector(8, 700, DAMAGE_MAGIC, 1, true)
+local tsa = TargetSelector(8, 624.9, DAMAGE_MAGIC, 1, true)
 -------/Orbwalk info-------
 
 local erange = 540
@@ -88,17 +88,12 @@ cfg.Draw:addParam("drawE", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
 cfg.Draw:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
 
 --	SxO:LoadToMenu(cfg.sxo)
-myTrueRange = myHero.range + GetDistance(myHero.minBBox)
-tsa.range = myTrueRange
+myTrueRange = 624.9
+tsa.range = 624.9
 end
 
 function OnTick()
 	if cfg == nil then return
-	end
-
-	if myTrueRange < myHero.range + GetDistance(myHero.minBBox) then
-	myTrueRange = myHero.range + GetDistance(myHero.minBBox)
-	tsa.range = myTrueRange
 	end
 
 	if cfg.Combo.orbkey and cfg.Combo.Combo then
