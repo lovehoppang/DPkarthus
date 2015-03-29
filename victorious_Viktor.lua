@@ -8,7 +8,7 @@ require "DivinePred"
 _G.AUTOUPDATE = true
 
 
-local version = "1.12"
+local version = "1.13"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -55,10 +55,13 @@ local erange = 540
 local damage = nil
 local cfg = nil
 
+local vts = nil
+
 function OnLoad()
 --	SxO = SxOrbWalk()
 
 cfg = scriptConfig("victorious_Viktor","Viktor")
+cfg:addSubMenu("Viktor: Target Selector","TS")
 cfg:addSubMenu("Combo Setting","Combo")
 cfg:addSubMenu("Harass Setting","Harass")
 cfg:addSubMenu("KillSteal","KillSteal")
@@ -67,18 +70,22 @@ cfg.KillSteal:addParam("useE", "E ON", SCRIPT_PARAM_ONOFF, false)
 cfg:addSubMenu("ULT Setting","RSetting")
 cfg:addSubMenu("Draw Setting","Draw")
 --	cfg:addSubMenu("SxOrbwalk Setting","sxo")
-cfg.Combo:addParam("Combo", "Combo Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+vts = TargetSelector(8, 1500, DAMAGE_MAGIC, 1, true)
+vts.name = "Viktor"
+cfg.TS:addTS(vts)
+cfg.Combo:addParam("Combo", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 cfg.Combo:addParam("useW", "Use W", SCRIPT_PARAM_ONOFF, false)
 cfg.Combo:addParam("wMana","Min. Mana To Use W", SCRIPT_PARAM_SLICE, 0, 0, 100, 0)
 cfg.Combo:addParam("useE", "Use E", SCRIPT_PARAM_ONOFF, true)
 cfg.Combo:addParam("eMana","Min. Mana To Use E", SCRIPT_PARAM_SLICE, 0, 0, 100, 0)
-cfg.Combo:addParam("useR", "Smart ult on", SCRIPT_PARAM_ONOFF, true)
+cfg.Combo:addParam("useR", "Use R", SCRIPT_PARAM_ONOFF, true)
 cfg.Combo:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
-cfg.Harass:addParam("Harass", "Harass Binding Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
+cfg.Harass:addParam("Harass", "Harass key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte('Z'))
 cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONOFF, false)
 cfg.Harass:addParam("eMana","Min. Mana To Harass", SCRIPT_PARAM_SLICE, 0, 0, 100, 0)
-cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 50, 0, 100, -1)
-cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
+cfg.Harass:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
+cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 40, 0, 100, -1)
+cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 cfg.Draw:addParam("enabled", "Draw enabled", SCRIPT_PARAM_ONOFF, true)
 cfg.Draw:addParam("lfc", "Use Lag Free Circles", SCRIPT_PARAM_ONOFF, true)
 cfg.Draw:addParam("drawAA", "Draw AA Range", SCRIPT_PARAM_ONOFF, true)
@@ -86,6 +93,8 @@ cfg.Draw:addParam("drawQ", "Draw Q Range", SCRIPT_PARAM_ONOFF, false)
 cfg.Draw:addParam("drawW", "Draw W Range", SCRIPT_PARAM_ONOFF, false)
 cfg.Draw:addParam("drawE", "Draw E Range", SCRIPT_PARAM_ONOFF, false)
 cfg.Draw:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, false)
+cfg.Combo:permaShow("Combo")
+cfg.Harass:permaShow("Harass")
 
 --	SxO:LoadToMenu(cfg.sxo)
 myTrueRange = 624.9
@@ -96,14 +105,11 @@ function OnTick()
 	if cfg == nil then return
 	end
 
-	if cfg.Combo.orbkey and cfg.Combo.Combo then
+	if (cfg.Combo.orbkey and cfg.Combo.Combo) or (cfg.Harass.orbkey and cfg.Harass.Harass) then
 		_OrbWalk()
 	end
 
-	TsQ:update()
-	TsW:update()
-	TsE:update()
-	TsR:update()
+	TargetUpdate()
 
 	if dpCD < os.clock()*100 - KillStealStamp then
 		KillSteal(TsQ.target,TsE.target)
@@ -118,8 +124,9 @@ function OnTick()
 		Harass()
 		lastTimeStamp = os.clock() * 100
 	end
-	if TsR.target ~= nil and 30 < os.clock() * 100 - lastStormStamp and myHero:CanUseSpell(_R) == READY then
+	if TsR.target ~= nil and dpCD < os.clock() * 100 - lastStormStamp and myHero:CanUseSpell(_R) == READY then
 		StormControl(TsR.target)
+		lastStormStamp = os.clock() * 100
 	end
 
 end
@@ -339,4 +346,16 @@ end
 function KillSteal(qTarget,eTarget)
 	if cfg.KillSteal.useE and eTarget ~= nil and getDmg("E", eTarget, myHero) > eTarget.health and myHero:CanUseSpell(_E) == READY then CastE(eTarget) end
 	if cfg.KillSteal.useQ and qTarget ~= nil and getDmg("Q", qTarget, myHero) > qTarget.health and myHero:CanUseSpell(_Q) == READY then CastQ(qTarget) end
+end
+
+function TargetUpdate()
+TsQ.mode = vts.mode
+TsW.mode = vts.mode
+TsE.mode = vts.mode
+TsR.mode = vts.mode
+
+TsQ:update()
+TsW:update()
+TsE:update()
+TsR:update()
 end
