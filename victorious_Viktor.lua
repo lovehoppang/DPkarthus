@@ -8,7 +8,7 @@ require "DivinePred"
 _G.AUTOUPDATE = true
 
 
-local version = "1.14"
+local version = "1.15"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -34,7 +34,7 @@ end
 
 local TsQ = TargetSelector(8, 740, DAMAGE_MAGIC, 1, true)
 local TsW = TargetSelector(8, 700, DAMAGE_MAGIC, 1, true)
-local TsE = TargetSelector(8, 1200, DAMAGE_MAGIC, 1, true)
+local TsE = TargetSelector(8, 1250, DAMAGE_MAGIC, 1, true)
 local TsR = TargetSelector(8, 700, DAMAGE_MAGIC, 1, true)
 
 local viktorE = LineSS(750,760,75,125,math.huge)
@@ -43,6 +43,7 @@ local dpCD = 30
 local lastTimeStamp = os.clock()*100
 local lastStormStamp = os.clock()*100
 local KillStealStamp = os.clock()*100
+local eStamp = os.clock()*100
 
 -------Orbwalk info-------
 local lastAttack, lastWindUpTime, lastAttackCD = 0, 0, 0
@@ -184,6 +185,7 @@ function Combo()
 
 		if dist<=erange then
 			Packet("S_CAST", {spellId = _E, toX = target.x, toY = target.z, fromX = target.x, fromY = target.z}):send()
+			return
 
 			elseif dist>erange and dist<1200 then
 				local dptarget = DPTarget(target)
@@ -196,11 +198,16 @@ function Combo()
 						local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
 						local hitPosZ = (erange*hitPos.z+(dist2 - erange)*myHero.z)/dist2
 						Packet("S_CAST", {spellId = _E, toX = hitPosX, toY = hitPosZ, fromX = hitPosX, fromY = hitPosZ}):send()
+						return
 					else
 						Packet("S_CAST", {spellId = _E, toX = hitPos.x, toY = hitPos.z, fromX = hitPos.x, fromY = hitPos.z}):send()
+						return
 					end
 				end
 			end
+				local castPosX2 = (erange*target.x+(dist - erange)*myHero.x)/dist
+				local castPosZ2 = (erange*target.z+(dist - erange)*myHero.z)/dist
+				Packet("S_CAST", {spellId = _E, toX = castPosX2, toY = castPosZ2, fromX = castPosX2, fromY = castPosZ2}):send()
 		end
 
 		function CastR(target)
