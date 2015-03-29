@@ -8,7 +8,7 @@ require "DivinePred"
 _G.AUTOUPDATE = true
 
 
-local version = "1.13"
+local version = "1.14"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -104,7 +104,8 @@ end
 function OnTick()
 	if cfg == nil then return
 	end
-
+	
+	
 	if (cfg.Combo.orbkey and cfg.Combo.Combo) or (cfg.Harass.orbkey and cfg.Harass.Harass) then
 		_OrbWalk()
 	end
@@ -229,7 +230,7 @@ function Combo()
 		end
 		function _OrbWalk()
 			tsa:update()
-			if tsa.target ~=nil and GetDistance(tsa.target) <= myTrueRange then	
+			if tsa.target ~=nil then	
 				if timeToShoot() then
 					myHero:Attack(tsa.target)
 					elseif heroCanMove() then
@@ -243,6 +244,8 @@ function Combo()
 				return (GetTickCount() + GetLatency()/2 > lastAttack + lastWindUpTime + 20)
 			end
 			function timeToShoot()
+			if cfg.Combo.Combo and cfg.Combo.useE and myHero.mana > myHero:GetSpellData(_E).mana then return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD) and (myHero:CanUseSpell(_E) ~= READY)
+			end
 				return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD)
 			end
 			function moveToCursor()
