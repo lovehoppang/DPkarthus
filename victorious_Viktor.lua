@@ -18,7 +18,7 @@ end
 if not sourceLibFound then return end
 
 
-local version = "1.21"
+local version = "1.22"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -266,15 +266,15 @@ function Combo()
 				local dptarget = DPTarget(target)
 				local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
 				local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
-				local state,hitPos,perc = dp:predict(dptarget,viktorE,2,Vector(castPosX,0,castPosZ))
+				local state,hitPos,perc = dp:predict(dptarget,viktorE,2,Vector(math.floor(castPosX),0,math.floor(castPosZ)))
 				if state == SkillShot.STATUS.SUCCESS_HIT then
 					if GetDistance(myHero,hitPos) > erange then					
 						local dist2 = GetDistance(myHero,hitPos)
 						local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
 						local hitPosZ = (erange*hitPos.z+(dist2 - erange)*myHero.z)/dist2
-						Packet("S_CAST", {spellId = _E, toX = hitPosX, toY = hitPosZ, fromX = hitPosX, fromY = hitPosZ}):send()
+						Packet("S_CAST", {spellId = _E, toX = math.floor(hitPosX), toY = math.floor(hitPosZ), fromX = math.floor(hitPosX), fromY = math.floor(hitPosZ)}):send()
 					else
-						Packet("S_CAST", {spellId = _E, toX = hitPos.x, toY = hitPos.z, fromX = hitPos.x, fromY = hitPos.z}):send()
+						Packet("S_CAST", {spellId = _E, toX = math.floor(hitPos.x), toY = math.floor(hitPos.z), fromX = math.floor(hitPos.x), fromY = math.floor(hitPos.z)}):send()
 					end
 				end
 			end
@@ -469,7 +469,7 @@ function RunFromMeCastE(target)
 local dist = GetDistance(myHero,target)
 local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
 local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
-	Packet("S_CAST", {spellId = _E, toX = castPosX, toY = castPosZ, fromX = castPosX, fromY = castPosZ}):send()
+	Packet("S_CAST", {spellId = _E, toX = math.floor(castPosX), toY = math.floor(castPosZ), fromX = math.floor(castPosX), fromY = math.floor(castPosZ)}):send()
 end
 
 function VpCastE(target)
@@ -481,16 +481,16 @@ if dist<=erange then
 	elseif dist>erange and dist<1200 then
 		local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
 		local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
-		local hitPos,hitChance,Position = vp:GetLineCastPosition(target, 0.6, 75, 760, 750, Vector(castPosX,0,castPosZ), false)
+		local hitPos,hitChance,Position = vp:GetLineCastPosition(target, 0.6, 75, 760, 750, Vector(math.floor(castPosX),0,math.floor(castPosZ)), false)
 		if hitChance >= 2 then
 				
 			if GetDistance(myHero,hitPos) > erange then					
 				local dist2 = GetDistance(myHero,hitPos)
 				local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
 				local hitPosZ = (erange*hitPos.z+(dist2 - erange)*myHero.z)/dist2
-				Packet("S_CAST", {spellId = _E, toX = hitPosX, toY = hitPosZ, fromX = hitPosX, fromY = hitPosZ}):send()
+				Packet("S_CAST", {spellId = _E, toX = math.floor(hitPosX), toY = math.floor(hitPosZ), fromX = math.floor(hitPosX), fromY = math.floor(hitPosZ)}):send()
 			else
-				Packet("S_CAST", {spellId = _E, toX = hitPos.x, toY = hitPos.z, fromX = hitPos.x, fromY = hitPos.z}):send()
+				Packet("S_CAST", {spellId = _E, toX = math.floor(hitPos.x), toY = math.floor(hitPos.z), fromX = math.floor(hitPos.x), fromY = math.floor(hitPos.z)}):send()
 			end
 		end
 	end
