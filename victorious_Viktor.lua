@@ -18,7 +18,7 @@ end
 if not sourceLibFound then return end
 
 
-local version = "1.22"
+local version = "1.221"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -53,6 +53,8 @@ local dpCD = 30
 local lastTimeStamp = os.clock()*100
 local lastStormStamp = os.clock()*100
 local KillStealStamp = os.clock()*100
+
+local tp = TargetPredictionVIP(1200, 1000, 0.1, 75)
 
 local vp = VPrediction()
 local DLib = nil
@@ -210,7 +212,7 @@ function Combo()
 			CastE(TsE.target)
 			runCD = runCD + 1
 		end
-		if runCD >= 6 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
+		if runCD >= 4 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
 			RunFromMeCastE(TsE.target)
 			runCD = 0
 		end
@@ -466,9 +468,10 @@ TsR:update()
 end
 
 function RunFromMeCastE(target)
-local dist = GetDistance(myHero,target)
-local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
-local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
+local _target = tp:GetPrediction(target)
+local dist = GetDistance(myHero,_target)
+local castPosX = (erange*_target.x+(dist - erange)*myHero.x)/dist
+local castPosZ = (erange*_target.z+(dist - erange)*myHero.z)/dist
 	Packet("S_CAST", {spellId = _E, toX = math.floor(castPosX), toY = math.floor(castPosZ), fromX = math.floor(castPosX), fromY = math.floor(castPosZ)}):send()
 end
 
