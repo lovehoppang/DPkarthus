@@ -273,7 +273,6 @@ function Combo()
 				local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
 				local state,hitPos,perc = dp:predict(dptarget,viktorE,2,Vector(math.floor(castPosX),0,math.floor(castPosZ)))
 				if state == SkillShot.STATUS.SUCCESS_HIT then
-					orb = false
 					if GetDistance(myHero,hitPos) > erange then					
 						local dist2 = GetDistance(myHero,hitPos)
 						local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
@@ -309,7 +308,6 @@ function Combo()
 					lastAttackCD = spell.animationTime*1000
 				end
 				if spell.name:lower():find("viktordeathray") then
-				orb = true
 				runCD = 0
 				end
 			end
@@ -480,7 +478,6 @@ local dist = GetDistance(myHero,_target)
 local castPosX = (erange*_target.x+(dist - erange)*myHero.x)/dist
 local castPosZ = (erange*_target.z+(dist - erange)*myHero.z)/dist
 	Packet("S_CAST", {spellId = _E, toX = math.floor(castPosX), toY = math.floor(castPosZ), fromX = math.floor(castPosX), fromY = math.floor(castPosZ)}):send()
-orb = false
 end
 
 function VpCastE(target)
