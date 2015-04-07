@@ -18,7 +18,7 @@ end
 if not sourceLibFound then return end
 
 
-local version = "1.2"
+local version = "1.21"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
