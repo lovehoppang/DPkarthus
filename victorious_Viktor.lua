@@ -4,8 +4,18 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 --require "SxOrbWalk"
 require "DivinePred"
+require "VPrediction"
 
 _G.AUTOUPDATE = true
+
+local sourceLibFound = true
+if FileExist(LIB_PATH .. "SourceLib.lua") then
+    require "SourceLib"
+else
+    sourceLibFound = false
+    DownloadFile("https://raw.github.com/TheRealSource/public/master/common/SourceLib.lua", LIB_PATH .. "SourceLib.lua", function() print("<font color=\"#6699ff\"><b>" .. scriptName .. ":</b></font> <font color=\"#FFFFFF\">SourceLib downloaded! Please reload!</font>") end)
+end
+if not sourceLibFound then return end
 
 
 local version = "1.2"
@@ -15,21 +25,21 @@ local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>victorious_Viktor:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if _G.AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/lovehoppang/DPkarthus/master/victorious_Viktor.version".."?rand="..math.random(1,10000))
-	if ServerData then
-		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
-		if ServerVersion then
-			if tonumber(version) < ServerVersion then
-				AutoupdaterMsg("New version available "..ServerVersion)
-				AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-			else
-				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
-			end
+local ServerData = GetWebResult(UPDATE_HOST, "/lovehoppang/DPkarthus/master/victorious_Viktor.version".."?rand="..math.random(1,10000))
+if ServerData then
+	ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+	if ServerVersion then
+		if tonumber(version) < ServerVersion then
+			AutoupdaterMsg("New version available "..ServerVersion)
+			AutoupdaterMsg("Updating, please don't press F9")
+			DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+		else
+			AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
 		end
-	else
-		AutoupdaterMsg("Error downloading version info")
 	end
+else
+	AutoupdaterMsg("Error downloading version info")
+end
 end
 
 local TsQ = TargetSelector(8, 740, DAMAGE_MAGIC, 1, true)
@@ -43,6 +53,11 @@ local dpCD = 30
 local lastTimeStamp = os.clock()*100
 local lastStormStamp = os.clock()*100
 local KillStealStamp = os.clock()*100
+
+local vp = VPrediction()
+local DLib = nil
+
+local runCD = 0
 
 -------Orbwalk info-------
 local lastAttack, lastWindUpTime, lastAttackCD = 0, 0, 0
@@ -59,21 +74,21 @@ local vts = nil
 
 local Interrupt = {}
 local InterruptList = {
-        {charName = "Caitlyn", spellName = "CaitlynAceintheHole"},
-        {charName = "FiddleSticks", spellName = "Crowstorm"},
-        {charName = "FiddleSticks", spellName = "Drain"},
-        {charName = "Galio", spellName = "GalioIdolOfDurand"},
-        {charName = "Karthus", spellName = "FallenOne"},
-        {charName = "Katarina", spellName = "KatarinaR"},
-        {charName = "Malzahar", spellName = "AlZaharNetherGrasp"},
-        {charName = "MissFortune", spellName = "MissFortuneBulletTime"},
-        {charName = "Nunu", spellName = "AbsoluteZero"},
-        {charName = "Pantheon", spellName = "Pantheon_GrandSkyfall_Jump"},
-        {charName = "Shen", spellName = "ShenStandUnited"},
-        {charName = "Urgot", spellName = "UrgotSwap2"},
-        {charName = "Varus", spellName = "VarusQ"},
-        {charName = "Warwick", spellName = "InfiniteDuress"}
-        }
+{charName = "Caitlyn", spellName = "CaitlynAceintheHole"},
+{charName = "FiddleSticks", spellName = "Crowstorm"},
+{charName = "FiddleSticks", spellName = "Drain"},
+{charName = "Galio", spellName = "GalioIdolOfDurand"},
+{charName = "Karthus", spellName = "FallenOne"},
+{charName = "Katarina", spellName = "KatarinaR"},
+{charName = "Malzahar", spellName = "AlZaharNetherGrasp"},
+{charName = "MissFortune", spellName = "MissFortuneBulletTime"},
+{charName = "Nunu", spellName = "AbsoluteZero"},
+{charName = "Pantheon", spellName = "Pantheon_GrandSkyfall_Jump"},
+{charName = "Shen", spellName = "ShenStandUnited"},
+{charName = "Urgot", spellName = "UrgotSwap2"},
+{charName = "Varus", spellName = "VarusQ"},
+{charName = "Warwick", spellName = "InfiniteDuress"}
+}
 
 function OnLoad()
 --	SxO = SxOrbWalk()
@@ -85,10 +100,11 @@ cfg:addSubMenu("Harass Setting","Harass")
 cfg:addSubMenu("KillSteal","KillSteal")
 cfg.KillSteal:addParam("useQ", "Q ON", SCRIPT_PARAM_ONOFF, false)
 cfg.KillSteal:addParam("useE", "E ON", SCRIPT_PARAM_ONOFF, false)
-cfg:addSubMenu("ULT Setting","RSetting")
+cfg:addSubMenu("R Setting","RSetting")
 cfg:addSubMenu("W Skill Interrupt Setting", "Winterrupt")
 cfg:addSubMenu("R Skill Interrupt Setting", "Rinterrupt")
 cfg:addSubMenu("Draw Setting","Draw")
+cfg:addSubMenu("Prediction Setting","ChoosePrediction")
 --	cfg:addSubMenu("SxOrbwalk Setting","sxo")
 vts = TargetSelector(8, 1500, DAMAGE_MAGIC, 1, true)
 vts.name = "Viktor"
@@ -105,7 +121,7 @@ cfg.Harass:addParam("toggleHarass", "Harass toggle on/off", SCRIPT_PARAM_ONKEYTO
 cfg.Harass:addParam("eMana","Min. Mana To Harass", SCRIPT_PARAM_SLICE, 0, 0, 100, 0)
 cfg.Harass:addParam("orbkey", "orbwalk", SCRIPT_PARAM_ONOFF, true)
 cfg.RSetting:addParam("RHealth", "Enemy Health % before R", SCRIPT_PARAM_SLICE, 40, 0, 100, -1)
-cfg.RSetting:addParam("RCount", "Enemy Count", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
+cfg.RSetting:addParam("RCount", "Enemy Count(Within combo range)", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 cfg.Draw:addParam("enabled", "Draw enabled", SCRIPT_PARAM_ONOFF, true)
 cfg.Draw:addParam("lfc", "Use Lag Free Circles", SCRIPT_PARAM_ONOFF, true)
 cfg.Draw:addParam("drawAA", "Draw AA Range", SCRIPT_PARAM_ONOFF, true)
@@ -118,15 +134,21 @@ cfg.Harass:permaShow("Harass")
 cfg.Harass:permaShow("toggleHarass")
 cfg.Winterrupt:addParam("On","W interrupt On", SCRIPT_PARAM_ONOFF, true)
 cfg.Rinterrupt:addParam("On","R interrupt On", SCRIPT_PARAM_ONOFF, false)
-
+cfg.ChoosePrediction:addParam("ChoosePrediction","Choose Prediction Lib.", SCRIPT_PARAM_LIST, 2, {"VPrediction", "Divine_Prediction"})
+DLib = DamageLib()
+--DamageLib:RegisterDamageSource(spellId, damagetype, basedamage, perlevel, scalingtype, scalingstat, percentscaling, condition, extra)
+DLib:RegisterDamageSource(_Q, _MAGIC, 40, 20, _MAGIC, _AP, 0.20, function() return (myHero:CanUseSpell(_Q) == READY) end)
+DLib:RegisterDamageSource(_E, _MAGIC, 70, 45, _MAGIC, _AP, 0.70, function() return (myHero:CanUseSpell(_E) == READY) end)
+DLib:RegisterDamageSource(_R, _MAGIC, 150, 100, _MAGIC, _AP, 0.55, function() return (myHero:CanUseSpell(_R) == READY) end)
+DLib:AddToMenu(cfg.Draw,{_Q,_E,_R,})
 for _,enemy in pairs(GetEnemyHeroes()) do
-	for _, potential in pairs(InterruptList) do
-		if enemy.charName == potential.charName then
-			table.insert(Interrupt, potential.spellName)
-			cfg.Winterrupt:addParam("interrupt" .. potential.spellName, "Interrupt " ..potential.spellName, SCRIPT_PARAM_ONOFF, true)
-			cfg.Rinterrupt:addParam("interrupt" .. potential.spellName, "Interrupt " ..potential.spellName, SCRIPT_PARAM_ONOFF, true)
-		end
+for _, potential in pairs(InterruptList) do
+	if enemy.charName == potential.charName then
+		table.insert(Interrupt, potential.spellName)
+		cfg.Winterrupt:addParam("interrupt" .. potential.spellName, "Interrupt " ..potential.spellName, SCRIPT_PARAM_ONOFF, true)
+		cfg.Rinterrupt:addParam("interrupt" .. potential.spellName, "Interrupt " ..potential.spellName, SCRIPT_PARAM_ONOFF, true)
 	end
+end
 end
 
 --	SxO:LoadToMenu(cfg.sxo)
@@ -135,25 +157,34 @@ tsa.range = 624.9
 end
 
 function OnTick()
-	if cfg == nil then return
-	end
-	
-	
-	if (cfg.Combo.orbkey and cfg.Combo.Combo) or (cfg.Harass.orbkey and cfg.Harass.Harass) then
-		_OrbWalk()
-	end
+if cfg == nil then return
+end
 
-	TargetUpdate()
 
-	if dpCD < os.clock()*100 - KillStealStamp then
-		KillSteal(TsQ.target,TsE.target)
-		KillStealStamp = os.clock() * 100
-	end
-	
-	if cfg.Combo.Combo and dpCD < os.clock() * 100 - lastTimeStamp then
-		Combo()
+if (cfg.Combo.orbkey and cfg.Combo.Combo) or (cfg.Harass.orbkey and cfg.Harass.Harass) then
+	_OrbWalk()
+end
+
+TargetUpdate()
+
+if dpCD < os.clock()*100 - KillStealStamp then
+	KillSteal(TsQ.target,TsE.target)
+	KillStealStamp = os.clock() * 100
+end
+
+if cfg.ChoosePrediction.ChoosePrediction == 2 and cfg.Combo.Combo and dpCD < os.clock() * 100 - lastTimeStamp then
+	Combo()
+	lastTimeStamp = os.clock() * 100
+	elseif cfg.ChoosePrediction.ChoosePrediction == 1 and cfg.Combo.Combo and dpCD < os.clock() * 100 - lastTimeStamp then
+		VpCombo()
 		lastTimeStamp = os.clock() * 100
-	end
+end
+
+if cfg.Combo.Combo ~= true then
+runCD = 0
+end
+
+
 	if (cfg.Harass.Harass or cfg.Harass.toggleHarass) and dpCD < os.clock() * 100 - lastTimeStamp and HarassManager() then
 		Harass()
 		lastTimeStamp = os.clock() * 100
@@ -174,8 +205,14 @@ function Combo()
 
 	if cfg.Combo.useE and TsQ.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
 		CastE(TsQ.target)
+		runCD = runCD + 1
 		elseif cfg.Combo.useE and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
 			CastE(TsE.target)
+			runCD = runCD + 1
+		end
+		if runCD >= 6 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
+			RunFromMeCastE(TsE.target)
+			runCD = 0
 		end
 
 		if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
@@ -189,11 +226,18 @@ function Combo()
 	end
 
 	function Harass()
-		if TsE.target ~= nil and myHero:CanUseSpell(_E) == READY then
+		if cfg.ChoosePrediction.ChoosePrediction == 2 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY then
 			if cfg.Harass.toggleHarass or cfg.Harass.Harass then
 				CastE(TsE.target)
 			end
 		end
+
+		if cfg.ChoosePrediction.ChoosePrediction == 1 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY then
+			if cfg.Harass.toggleHarass or cfg.Harass.Harass then
+				VpCastE(TsE.target)
+			end
+		end
+
 	end
 
 
@@ -263,143 +307,150 @@ function Combo()
 
 
 			if #Interrupt > 0 then
-                for _, ability in pairs(Interrupt) do
-                        if ability == spell.name and object.team ~= myHero.team then
-                                if cfg.Winterrupt["interrupt"..ability] and cfg.Winterrupt.On and myHero:CanUseSpell(_W) == READY then
-                                        if GetDistance(object) <= 700 then Packet("S_CAST", {spellId = _W, toX = object.x, toY = object.z, fromX = object.x, fromY = object.z}):send()
-                                        end
-                                elseif
-                                	cfg.Rinterrupt["interrupt"..ability] and cfg.Rinterrupt.On and myHero:CanUseSpell(_R) == READY then
-                                	if GetDistance(object) <= 700 then Packet("S_CAST", {spellId = _R, toX = object.x, toY = object.z, fromX = object.x, fromY = object.z}):send()
-                                    end
-                                end
-                        end
-                end
-        	end
-
-		end
-
-		function _OrbWalk()
-			tsa:update()
-			if tsa.target ~=nil then	
-				if timeToShoot() then
-					myHero:Attack(tsa.target)
-					elseif heroCanMove() then
-						moveToCursor()
+				for _, ability in pairs(Interrupt) do
+					if ability == spell.name and object.team ~= myHero.team then
+						if cfg.Winterrupt["interrupt"..ability] and cfg.Winterrupt.On and myHero:CanUseSpell(_W) == READY then
+							if GetDistance(object) <= 700 then Packet("S_CAST", {spellId = _W, toX = object.x, toY = object.z, fromX = object.x, fromY = object.z}):send()
+						end
+					elseif
+						cfg.Rinterrupt["interrupt"..ability] and cfg.Rinterrupt.On and myHero:CanUseSpell(_R) == READY then
+						if GetDistance(object) <= 700 then Packet("S_CAST", {spellId = _R, toX = object.x, toY = object.z, fromX = object.x, fromY = object.z}):send()
 					end
-				else	
-					moveToCursor()
 				end
 			end
-			function heroCanMove()
-				return (GetTickCount() + GetLatency()/2 > lastAttack + lastWindUpTime + 20)
+		end
+	end
+
+end
+
+function _OrbWalk()
+	tsa:update()
+	if tsa.target ~=nil then	
+		if timeToShoot() then
+			myHero:Attack(tsa.target)
+			elseif heroCanMove() then
+				moveToCursor()
 			end
-			function timeToShoot()
-			if cfg.Combo.Combo and cfg.Combo.useE and myHero.mana > myHero:GetSpellData(_E).mana then return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD) and (myHero:CanUseSpell(_E) ~= READY)
-			end
-				return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD)
-			end
-			function moveToCursor()
-				if GetDistance(mousePos) > 1 then
-					local moveToPos = myHero + (Vector(mousePos) - myHero):normalized()*300
-					myHero:MoveTo(moveToPos.x, moveToPos.z)
-				end
-			end
+		else	
+			moveToCursor()
+		end
+	end
+	function heroCanMove()
+		return (GetTickCount() + GetLatency()/2 > lastAttack + lastWindUpTime + 20)
+	end
+	function timeToShoot()
+		if cfg.Combo.Combo and cfg.Combo.useE and myHero.mana > myHero:GetSpellData(_E).mana then return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD) and (myHero:CanUseSpell(_E) ~= READY)
+		end
+		return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD)
+	end
+	function moveToCursor()
+		if GetDistance(mousePos) > 1 then
+			local moveToPos = myHero + (Vector(mousePos) - myHero):normalized()*300
+			myHero:MoveTo(moveToPos.x, moveToPos.z)
+		end
+	end
 
 
 
-			function __draw()
+function __draw()
 
-				DrawCircles()
+DrawCircles()
 
-			end
+if cfg.Draw.drawPredictedHealth then
+for i, enemy in ipairs(GetEnemyHeroes()) do
+if ValidTarget(enemy) then
+DrawIndicator(enemy)
+end
+end
+end
+end
 
-			function DrawCircles()
+	function DrawCircles()
 
-				if cfg and cfg.Draw and cfg.Draw.enabled then
+		if cfg and cfg.Draw and cfg.Draw.enabled then
 
-					if cfg.Draw.lfc then
+			if cfg.Draw.lfc then
 
-						if cfg.Draw.drawAA then DrawCircleLFC(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
+				if cfg.Draw.drawAA then DrawCircleLFC(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
 
-						if cfg.Draw.drawQ then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
+				if cfg.Draw.drawQ then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
 
-						if cfg.Draw.drawW then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+				if cfg.Draw.drawW then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
-						if cfg.Draw.drawE then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
+				if cfg.Draw.drawE then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
 
-						if cfg.Draw.drawR then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+				if cfg.Draw.drawR then DrawCircleLFC(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
 
-        else -- NORMAL CIRCLES
+    else -- NORMAL CIRCLES
 
-        	if cfg.Draw.drawAA then DrawCircle(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
+    	if cfg.Draw.drawAA then DrawCircle(myHero.x, myHero.y, myHero.z, myTrueRange, ARGB(255,255,255,255)) end 
 
-        	if cfg.Draw.drawQ then DrawCircle(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
+    	if cfg.Draw.drawQ then DrawCircle(myHero.x, myHero.y, myHero.z, 740, ARGB(255,255,255,255)) end 
 
-        	if cfg.Draw.drawW then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
+    	if cfg.Draw.drawW then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
-        	if cfg.Draw.drawE then DrawCircle(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
+    	if cfg.Draw.drawE then DrawCircle(myHero.x, myHero.y, myHero.z, 1200, ARGB(255,255,255,255)) end 
 
-        	if cfg.Draw.drawR then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
-
-        end
+    	if cfg.Draw.drawR then DrawCircle(myHero.x, myHero.y, myHero.z, 700, ARGB(255,255,255,255)) end 
 
     end
 
 end
 
+end
+
 
 function DrawCircleLFC(x, y, z, radius, color)
-	local vPos1 = Vector(x, y, z)
-	local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
-	local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
-	local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
-	if OnScreen({ x = sPos.x, y = sPos.y }, { x = sPos.x, y = sPos.y }) then
-		DrawCircleNextLvl(x, y, z, radius, 1, color, 75) 
-	end
+local vPos1 = Vector(x, y, z)
+local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
+local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
+local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
+if OnScreen({ x = sPos.x, y = sPos.y }, { x = sPos.x, y = sPos.y }) then
+	DrawCircleNextLvl(x, y, z, radius, 1, color, 75) 
+end
 end
 
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
-	radius = radius or 300
-	quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
-	quality = 2 * math.pi / quality
-	radius = radius*.92
-	local points = {}
-	for theta = 0, 2 * math.pi + quality, quality do
-		local c = WorldToScreen(D3DXVECTOR3(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
-		points[#points + 1] = D3DXVECTOR2(c.x, c.y)
-	end
-	DrawLines2(points, width or 1, color or 4294967295)
+radius = radius or 300
+quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
+quality = 2 * math.pi / quality
+radius = radius*.92
+local points = {}
+for theta = 0, 2 * math.pi + quality, quality do
+	local c = WorldToScreen(D3DXVECTOR3(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
+	points[#points + 1] = D3DXVECTOR2(c.x, c.y)
+end
+DrawLines2(points, width or 1, color or 4294967295)
 end
 
 function eManaManager()
-	if myHero.mana < (myHero.maxMana * ( cfg.Combo.eMana / 100)) then
-		return false
-	else
-		return true
-	end
+if myHero.mana < (myHero.maxMana * ( cfg.Combo.eMana / 100)) then
+	return false
+else
+	return true
+end
 end
 
 function wManaManager()
-	if myHero.mana < (myHero.maxMana * ( cfg.Combo.wMana / 100)) then
-		return false
-	else
-		return true
-	end
+if myHero.mana < (myHero.maxMana * ( cfg.Combo.wMana / 100)) then
+	return false
+else
+	return true
+end
 end
 
 function HarassManager()
-	if myHero.mana < (myHero.maxMana * ( cfg.Harass.eMana / 100)) then
-		return false
-	else
-		return true
-	end
+if myHero.mana < (myHero.maxMana * ( cfg.Harass.eMana / 100)) then
+	return false
+else
+	return true
+end
 end
 
 function KillSteal(qTarget,eTarget)
-	if cfg.KillSteal.useE and eTarget ~= nil and getDmg("E", eTarget, myHero) > eTarget.health and myHero:CanUseSpell(_E) == READY then CastE(eTarget) end
-	if cfg.KillSteal.useQ and qTarget ~= nil and getDmg("Q", qTarget, myHero) > qTarget.health and myHero:CanUseSpell(_Q) == READY then CastQ(qTarget) end
+if cfg.KillSteal.useE and eTarget ~= nil and getDmg("E", eTarget, myHero) > eTarget.health and myHero:CanUseSpell(_E) == READY then CastE(eTarget) end
+if cfg.KillSteal.useQ and qTarget ~= nil and getDmg("Q", qTarget, myHero) > qTarget.health and myHero:CanUseSpell(_Q) == READY then CastQ(qTarget) end
 end
 
 function TargetUpdate()
@@ -414,3 +465,69 @@ TsE:update()
 TsR:update()
 end
 
+function RunFromMeCastE(target)
+local dist = GetDistance(myHero,target)
+local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
+local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
+	Packet("S_CAST", {spellId = _E, toX = castPosX, toY = castPosZ, fromX = castPosX, fromY = castPosZ}):send()
+end
+
+function VpCastE(target)
+local dist = GetDistance(myHero,target)
+
+if dist<=erange then
+	Packet("S_CAST", {spellId = _E, toX = target.x, toY = target.z, fromX = target.x, fromY = target.z}):send()
+
+	elseif dist>erange and dist<1200 then
+		local castPosX = (erange*target.x+(dist - erange)*myHero.x)/dist
+		local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
+		local hitPos,hitChance,Position = vp:GetLineCastPosition(target, 0.6, 75, 760, 750, Vector(castPosX,0,castPosZ), false)
+		if hitChance >= 2 then
+				
+			if GetDistance(myHero,hitPos) > erange then					
+				local dist2 = GetDistance(myHero,hitPos)
+				local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
+				local hitPosZ = (erange*hitPos.z+(dist2 - erange)*myHero.z)/dist2
+				Packet("S_CAST", {spellId = _E, toX = hitPosX, toY = hitPosZ, fromX = hitPosX, fromY = hitPosZ}):send()
+			else
+				Packet("S_CAST", {spellId = _E, toX = hitPos.x, toY = hitPos.z, fromX = hitPos.x, fromY = hitPos.z}):send()
+			end
+		end
+	end
+end
+
+function VpCastW(target)
+local hitPos, HitChance, Position = vp:GetCircularCastPosition(target, 0.6, 125, 700)
+     if HitChance >= 2 then
+     Packet("S_CAST", {spellId = _W, toX = hitPos.x, toY = hitPos.z, fromX = hitPos.x, fromY = hitPos.z}):send()
+     end
+end
+
+function VpCombo()
+	if cfg.Combo.useR and (myHero:GetSpellData(_R).name == "ViktorChaosStorm" and TsR.target ~= nil and myHero:CanUseSpell(_R) == READY) then
+		if TsR.target.health < (TsR.target.maxHealth * (cfg.RSetting.RHealth / 100)) or (CountEnemyHeroInRange(700) >= cfg.RSetting.RCount) or (myHero.health < myHero.maxHealth * 0.2) then
+			CastR(TsR.target)
+		end
+	end
+
+	if cfg.Combo.useE and TsQ.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
+		VpCastE(TsQ.target)
+		runCD = runCD + 1
+		elseif cfg.Combo.useE and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
+			VpCastE(TsE.target)
+			runCD = runCD + 1
+		end
+		if runCD >= 6 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
+			RunFromMeCastE(TsE.target)
+			runCD = 0
+		end
+
+		if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
+			CastQ(TsQ.target)
+		end
+
+		if cfg.Combo.useW and TsW.target ~= nil and myHero:CanUseSpell(_W) == READY and wManaManager() then
+			VpCastW(TsW.target)
+		end
+
+	end
