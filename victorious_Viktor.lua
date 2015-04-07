@@ -18,7 +18,7 @@ end
 if not sourceLibFound then return end
 
 
-local version = "1.221"
+local version = "1.3"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/lovehoppang/DPkarthus/master/victorious_Viktor.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -60,6 +60,8 @@ local vp = VPrediction()
 local DLib = nil
 
 local runCD = 0
+
+local orb = true
 
 -------Orbwalk info-------
 local lastAttack, lastWindUpTime, lastAttackCD = 0, 0, 0
@@ -163,6 +165,7 @@ if cfg == nil then return
 end
 
 
+
 if (cfg.Combo.orbkey and cfg.Combo.Combo) or (cfg.Harass.orbkey and cfg.Harass.Harass) then
 	_OrbWalk()
 end
@@ -214,7 +217,6 @@ function Combo()
 		end
 		if runCD >= 4 and TsE.target ~= nil and myHero:CanUseSpell(_E) == READY and eManaManager() then
 			RunFromMeCastE(TsE.target)
-			runCD = 0
 		end
 
 		if TsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
@@ -263,6 +265,7 @@ function Combo()
 
 		if dist<=erange then
 			Packet("S_CAST", {spellId = _E, toX = target.x, toY = target.z, fromX = target.x, fromY = target.z}):send()
+			return
 
 			elseif dist>erange and dist<1200 then
 				local dptarget = DPTarget(target)
@@ -270,6 +273,7 @@ function Combo()
 				local castPosZ = (erange*target.z+(dist - erange)*myHero.z)/dist
 				local state,hitPos,perc = dp:predict(dptarget,viktorE,2,Vector(math.floor(castPosX),0,math.floor(castPosZ)))
 				if state == SkillShot.STATUS.SUCCESS_HIT then
+					orb = false
 					if GetDistance(myHero,hitPos) > erange then					
 						local dist2 = GetDistance(myHero,hitPos)
 						local hitPosX = (erange*hitPos.x+(dist2 - erange)*myHero.x)/dist2
@@ -303,7 +307,10 @@ function Combo()
 					lastAttack = GetTickCount() - GetLatency()/2
 					lastWindUpTime = spell.windUpTime*1000
 					lastAttackCD = spell.animationTime*1000
-
+				end
+				if spell.name:lower():find("viktordeathray") then
+				orb = true
+				runCD = 0
 				end
 			end
 
@@ -333,12 +340,12 @@ function _OrbWalk()
 			elseif heroCanMove() then
 				moveToCursor()
 			end
-		else	
+		elseif heroCanMove() then
 			moveToCursor()
 		end
 	end
 	function heroCanMove()
-		return (GetTickCount() + GetLatency()/2 > lastAttack + lastWindUpTime + 20)
+		return (GetTickCount() + GetLatency()/2 > lastAttack + lastWindUpTime + 20 and orb)
 	end
 	function timeToShoot()
 		if cfg.Combo.Combo and cfg.Combo.useE and myHero.mana > myHero:GetSpellData(_E).mana then return (GetTickCount() + GetLatency()/2 > lastAttack + lastAttackCD) and (myHero:CanUseSpell(_E) ~= READY)
@@ -473,6 +480,7 @@ local dist = GetDistance(myHero,_target)
 local castPosX = (erange*_target.x+(dist - erange)*myHero.x)/dist
 local castPosZ = (erange*_target.z+(dist - erange)*myHero.z)/dist
 	Packet("S_CAST", {spellId = _E, toX = math.floor(castPosX), toY = math.floor(castPosZ), fromX = math.floor(castPosX), fromY = math.floor(castPosZ)}):send()
+orb = false
 end
 
 function VpCastE(target)
