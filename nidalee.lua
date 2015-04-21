@@ -225,7 +225,7 @@ cfg.killSteal:addParam("ignite","Use Ignite", SCRIPT_PARAM_ONOFF, true)
 selectorMode.name = "Nidalee"
 cfg.TS:addTS(selectorMode)
 cfg.jungleSteal:addParam("onKey","Jungle Steal key",SCRIPT_PARAM_ONKEYDOWN, false, string.byte('G'))
-cfg.jungleSteal:addParam("toggle","Jungle Steal key",SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte('J'))
+cfg.jungleSteal:addParam("toggle","Jungle Steal toggle",SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte('J'))
 cfg.jungleSteal:addParam("useQ","Use Q",SCRIPT_PARAM_ONOFF, true)
 cfg.jungleSteal:addParam("useS","Use Smite",SCRIPT_PARAM_ONOFF, true)
 cfg:addParam("arg","----------",5,"")
