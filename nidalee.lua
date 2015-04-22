@@ -524,7 +524,6 @@ end
 function Nidalee:CastWH(packet,target,hitChance,prediction)
 if prediction == 1 then
 	local hitPos, _hitChance = self.HPred:GetPredict("W",target,myHero)
-	print(hitChance)
 	if _hitChance >= hitChance then
 
 	if packet then
