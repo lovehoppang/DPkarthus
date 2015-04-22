@@ -2,7 +2,7 @@ if myHero.charName ~= "Nidalee" then return end
 
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("OBECJGFFHDE") 
 
-local version = "1.0"
+local version = "1.1"
 
 local existDP = false
 local existHP = false
@@ -219,6 +219,10 @@ cfg.draw:addParam("eColor", "E Color", SCRIPT_PARAM_COLOR, {255, 100, 44, 255})
 cfg.draw:addParam("lagFree","Use Lag Free Circles",SCRIPT_PARAM_ONOFF, false)
 cfg.choosePrediction:addParam("choosePrediction","Choose Prediction Lib.", SCRIPT_PARAM_LIST, 2, {"HPrediction", "Divine Prediction"})
 cfg.choosePrediction:addSubMenu("Hprediction Settings","hpred")
+cfg.choosePrediction:addSubMenu("DivinePrediction Settings","dpred")
+cfg.choosePrediction.dpred:addParam("dpredWidth","Set Q Width value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.width, 10, 150, 2)
+cfg.choosePrediction.dpred:addParam("dpredSpeed","Set Q Speed value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.speed, 100, 2000, 2)
+cfg.choosePrediction.dpred:addParam("dpredDelay","Set Q Delay value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.delay, 0.1, 2, 2)
 cfg.choosePrediction.hpred:addParam("hpredHitChanceCombo","Combo HitChance", SCRIPT_PARAM_SLICE, 2, 1, 3, 2)
 cfg.choosePrediction.hpred:addParam("hpredHitChanceHarass","Harass HitChance", SCRIPT_PARAM_SLICE, 1.2, 1, 3, 2)
 cfg.killSteal:addParam("ignite","Use Ignite", SCRIPT_PARAM_ONOFF, true)
@@ -368,7 +372,8 @@ if not nidalee.isHuman then
 	end
 elseif nidalee.isHuman then
 	if cfg.combo.human.useQ and nidalee.humanTsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
-		nidalee:CastQH(cfg.misc.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction)
+		local setDp = {width = math.floor(cfg.choosePrediction.dpred.dpredWidth), speed = math.floor(cfg.choosePrediction.dpred.dpredSpeed), delay = cfg.choosePrediction.dpred.dpredDelay}
+		nidalee:CastQH(cfg.misc.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction,setDp)
 	end
 	if cfg.combo.human.useW and nidalee.humanTsW.target ~= nil and myHero:CanUseSpell(_W) == READY then
 		nidalee:CastWH(cfg.misc.packet,nidalee.humanTsW.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction)
@@ -380,7 +385,8 @@ end
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 function Harass()
-	nidalee:CastQH(cfg.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceHarass,cfg.choosePrediction.choosePrediction)
+	local setDp = {width = math.floor(cfg.choosePrediction.dpred.dpredWidth), speed = math.floor(cfg.choosePrediction.dpred.dpredSpeed), delay = cfg.choosePrediction.dpred.dpredDelay}
+	nidalee:CastQH(cfg.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceHarass,cfg.choosePrediction.choosePrediction,setDp)
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 function Flee()
@@ -485,7 +491,7 @@ end
 self.isHuman = myHero:GetSpellData(_Q).name == "JavelinToss"
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-function Nidalee:CastQH(packet,target,hitChance,prediction)
+function Nidalee:CastQH(packet,target,hitChance,prediction,setDp)
 if prediction == 1 then
 	local hitPos, _hitChance = self.HPred:GetPredict("Q",target,myHero)
 	if _hitChance >= hitChance then
@@ -499,6 +505,7 @@ if prediction == 1 then
 	end
 elseif prediction == 2 then
 	if self.divineLastTime + self.divineCd > GetGameTimer() then return end
+	if setDp ~= nil then self.divineQSkill = LineSS(setDp.speed,self.spells.humanQ.range,setDp.width,setDp.delay,0) end
 	target = DPTarget(target)
 	local state,hitPos,perc = self.dp:predict(target,self.divineQSkill)
 	if state == SkillShot.STATUS.SUCCESS_HIT then
@@ -596,6 +603,15 @@ Spell_Q.speed['Nidalee'] = self.spells.humanQ.speed
 Spell_Q.type['Nidalee'] = "DelayLine"
 Spell_Q.width['Nidalee'] = self.spells.humanQ.width
 -----Human Q-----
+-----Human W-----
+Spell_W.collisionM['Nidalee'] = false
+Spell_W.collisionH['Nidalee'] = false
+Spell_W.delay['Nidalee'] = self.spells.humanW.delay
+Spell_W.range['Nidalee'] = self.spells.humanW.range
+Spell_W.speed['Nidalee'] = self.spells.humanW.speed
+Spell_W.type['Nidalee'] = "DelayCircle"
+Spell_W.width['Nidalee'] = self.spells.humanW.radius
+-----Human W-----
 end
 -----Smite and Ignite-----
   if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
