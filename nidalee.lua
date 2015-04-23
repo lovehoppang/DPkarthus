@@ -372,8 +372,7 @@ if not nidalee.isHuman then
 	end
 elseif nidalee.isHuman then
 	if cfg.combo.human.useQ and nidalee.humanTsQ.target ~= nil and myHero:CanUseSpell(_Q) == READY then
-		local setDp = {width = math.floor(cfg.choosePrediction.dpred.dpredWidth), speed = math.floor(cfg.choosePrediction.dpred.dpredSpeed), delay = math.floor(cfg.choosePrediction.dpred.dpredDelay*1000)}
-		nidalee:CastQH(cfg.misc.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction,setDp)
+		nidalee:CastQH(cfg.misc.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction)
 	end
 	if cfg.combo.human.useW and nidalee.humanTsW.target ~= nil and myHero:CanUseSpell(_W) == READY then
 		nidalee:CastWH(cfg.misc.packet,nidalee.humanTsW.target,cfg.choosePrediction.hpred.hpredHitChanceCombo,cfg.choosePrediction.choosePrediction)
@@ -385,8 +384,7 @@ end
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 function Harass()
-	local setDp = {width = math.floor(cfg.choosePrediction.dpred.dpredWidth), speed = math.floor(cfg.choosePrediction.dpred.dpredSpeed), delay = math.floor(cfg.choosePrediction.dpred.dpredDelay*1000)}
-	nidalee:CastQH(cfg.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceHarass,cfg.choosePrediction.choosePrediction,setDp)
+	nidalee:CastQH(cfg.packet,nidalee.humanTsQ.target,cfg.choosePrediction.hpred.hpredHitChanceHarass,cfg.choosePrediction.choosePrediction)
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 function Flee()
@@ -491,7 +489,7 @@ end
 self.isHuman = myHero:GetSpellData(_Q).name == "JavelinToss"
 end
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-function Nidalee:CastQH(packet,target,hitChance,prediction,setDp)
+function Nidalee:CastQH(packet,target,hitChance,prediction)
 if prediction == 1 then
 	local hitPos, _hitChance = self.HPred:GetPredict("Q",target,myHero)
 	if _hitChance >= hitChance then
@@ -505,7 +503,6 @@ if prediction == 1 then
 	end
 elseif prediction == 2 then
 	if self.divineLastTime + self.divineCd > GetGameTimer() then return end
-	if setDp ~= nil then self.divineQSkill = LineSS(setDp.speed,self.spells.humanQ.range,setDp.width,setDp.delay,0) end
 	target = DPTarget(target)
 	local state,hitPos,perc = self.dp:predict(target,self.divineQSkill)
 	if state == SkillShot.STATUS.SUCCESS_HIT then
