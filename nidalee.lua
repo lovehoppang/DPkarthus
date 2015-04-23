@@ -219,10 +219,6 @@ cfg.draw:addParam("eColor", "E Color", SCRIPT_PARAM_COLOR, {255, 100, 44, 255})
 cfg.draw:addParam("lagFree","Use Lag Free Circles",SCRIPT_PARAM_ONOFF, false)
 cfg.choosePrediction:addParam("choosePrediction","Choose Prediction Lib.", SCRIPT_PARAM_LIST, 2, {"HPrediction", "Divine Prediction"})
 cfg.choosePrediction:addSubMenu("Hprediction Settings","hpred")
-cfg.choosePrediction:addSubMenu("DivinePrediction Settings","dpred")
-cfg.choosePrediction.dpred:addParam("dpredWidth","Set Q Width value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.width, 10, 150, 2)
-cfg.choosePrediction.dpred:addParam("dpredSpeed","Set Q Speed value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.speed, 100, 2000, 2)
-cfg.choosePrediction.dpred:addParam("dpredDelay","Set Q Delay value", SCRIPT_PARAM_SLICE, nidalee.spells.humanQ.delay, 0.1, 2, 2)
 cfg.choosePrediction.hpred:addParam("hpredHitChanceCombo","Combo HitChance", SCRIPT_PARAM_SLICE, 1.2, 1, 3, 2)
 cfg.choosePrediction.hpred:addParam("hpredHitChanceHarass","Harass HitChance", SCRIPT_PARAM_SLICE, 1.2, 1, 3, 2)
 cfg.killSteal:addParam("ignite","Use Ignite", SCRIPT_PARAM_ONOFF, true)
@@ -596,16 +592,15 @@ Spell_Q.collisionM['Nidalee'] = true
 Spell_Q.collisionH['Nidalee'] = true
 Spell_Q.delay['Nidalee'] = self.spells.humanQ.delay
 Spell_Q.range['Nidalee'] = self.spells.humanQ.range
-Spell_Q.speed['Nidalee'] = 1850
+Spell_Q.speed['Nidalee'] = self.spells.humanQ.speed
 Spell_Q.type['Nidalee'] = "DelayLine"
-Spell_Q.width['Nidalee'] = 120
+Spell_Q.width['Nidalee'] = self.spells.humanQ.width
 -----Human Q-----
 -----Human W-----
 Spell_W.collisionM['Nidalee'] = false
 Spell_W.collisionH['Nidalee'] = false
 Spell_W.delay['Nidalee'] = self.spells.humanW.delay
 Spell_W.range['Nidalee'] = self.spells.humanW.range
-Spell_W.speed['Nidalee'] = 1
 Spell_W.type['Nidalee'] = "PromptCircle"
 Spell_W.radius['Nidalee'] = self.spells.humanW.radius
 -----Human W-----
