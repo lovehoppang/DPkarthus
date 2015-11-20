@@ -1,2 +1,0 @@
-# DPkarthus
-Hi~! ^ ^
